@@ -1,0 +1,48 @@
+import pandas as pd
+import streamlit as st
+from sklearn.ensemble import RandomForestClassifier
+
+st.title("Wingo Outcome Analyzer (Statistical Model)")
+st.warning("⚠️ This app does NOT guarantee prediction. For educational use only.")
+
+# Upload data
+file = st.file_uploader("Upload past results CSV", type=["csv"])
+
+if file:
+    df = pd.read_csv(file)
+
+    st.subheader("Last 5 Rounds")
+    st.dataframe(df.tail(5))
+
+    # Encode values
+    df['color'] = df['color'].map({'Red':0, 'Green':1, 'Violet':2})
+    df['size'] = df['size'].map({'Small':0, 'Big':1})
+
+    X = df[['number']]
+    y_color = df['color']
+    y_size = df['size']
+
+    # Train models
+    color_model = RandomForestClassifier()
+    size_model = RandomForestClassifier()
+
+    color_model.fit(X, y_color)
+    size_model.fit(X, y_size)
+
+    last_number = df['number'].iloc[-1]
+
+    color_pred = color_model.predict([[last_number]])[0]
+    size_pred = size_model.predict([[last_number]])[0]
+
+    color_map = {0:'Red', 1:'Green', 2:'Violet'}
+    size_map = {0:'Small', 1:'Big'}
+
+    st.subheader("📊 Suggested Outcome (Best Guess)")
+    st.success(f"Color : {color_map[color_pred]}")
+    st.success(f"Size  : {size_map[size_pred]}")
+
+    confidence = round(color_model.predict_proba([[last_number]]).max()*100, 2)
+    st.info(f"Model Confidence: {confidence}%")
+
+else:
+    st.info("Upload a CSV file to begin")
