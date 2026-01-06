@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sp hack</title>
+    <style>
+        /* --- 1. बेसिक और मैट्रिक्स थीम --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden; 
+        }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #000;
+            color: #0F0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative; 
+        }
+
+        /* --- 1.1. मैट्रिक्स बैकग्राउंड --- */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; 
+            opacity: 0.7; 
+        }
+        .app-container {
+            z-index: 2; 
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            border: 2px solid #0F0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* कंटेंट को ऊपर से शुरू करने के लिए */
+            align-items: center;
+            position: relative;
+            background-color: rgba(0, 0, 0, 0.7); 
+        }
+
+        /* --- 1.2. नया हैडर टेक्स्ट --- */
+        #header-text {
+            font-size: 2.5em; /* बड़ा साइज़ */
+            font-weight: bold;
+            color: #0F0;
+            margin-bottom: 25px; /* नीचे स्पेस */
+            margin-top: 10px;
+            text-shadow: 0 0 10px #0F0;
+            animation: flicker 1.5s infinite alternate; /* मैट्रिक्स इफ़ेक्ट जैसा ही */
+        }
+        
+        /* --- 2. बटन और इनपुट स्टाइल --- */
+        button {
+            background-color: #020;
+            border: 2px solid #0F0;
+            color: #0F0;
+            padding: 15px 0;
+            margin: 10px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            width: 80%;
+            max-width: 300px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px #0F0;
+        }
+        button:hover, button:active {
+            background-color: #0F0;
+            color: #000;
+            box-shadow: 0 0 15px #0F0;
+        }
+        input[type="password"], input[type="text"] {
+            background-color: #010;
+            border: 1px solid #0F0;
+            color: #0F0;
+            padding: 15px;
+            width: 80%;
+            max-width: 300px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        /* --- 3. सेक्शन्स को छिपाने/दिखाने के लिए --- */
+        .hidden {
+            display: none !important;
+        }
+
+        #button-container,
+        #password-section,
+        #game-section,
+        #result-area {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- 4. पॉप-अप (मोडल) स्टाइल --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 20, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #000;
+            border: 2px solid #0F0;
+            padding: 20px;
+            border-radius: 5px;
+            position: relative;
+            width: 95%;
+            max-width: 500px;
+            box-shadow: 0 0 20px #0F0;
+        }
+        .modal-content h2 {
+            margin-bottom: 15px;
+            color: #0F0;
+        }
+        .modal-content p {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        .close-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 1.5em;
+            color: #000;
+            background: #0F0;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid #0F0;
+        }
+        
+        /* रजिस्टर पॉप-अप में iframe को वापस सेट करना */
+        #register-popup iframe {
+            width: 100%;
+            height: 60vh;
+            border: 1px solid #0F0;
+            background: #fff; 
+        }
+
+        /* --- 5. रिजल्ट और लोडर --- */
+        #result-text {
+            font-size: 5em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 0 10px #0F0;
+            animation: flicker 1.5s infinite alternate;
+        }
+        #new-account-msg {
+            font-size: 1.2em;
+            color: #FF0; 
+            margin-bottom: 20px;
+        }
+        .loader {
+            border: 8px solid #030;
+            border-top: 8px solid #0F0;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes flicker {
+            0%, 18%, 22%, 25%, 53%, 57%, 100% {
+                text-shadow: 0 0 4px #0F0, 0 0 11px #0F0, 0 0 19px #0F0;
+                color: #0F0;
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+                color: #0A0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+
+    <div class="app-container">
+        
+        <div id="header-text">Sp hack</div>
+
+        <div id="button-container" class="hidden">
+            <button id="start-btn">Start Software</button>
+            <button id="register-btn">Register</button>
+            <button id="telegram-btn">Join Telegram</button>
+        </div>
+
+        <div id="password-section" class="hidden">
+            <label for="password-input">Enter Password</label>
+            <input type="password" id="password-input">
+            </div>
+
+        <div id="game-section" class="hidden">
+            <label for="number-input">Enter 3 last digit number</label>
+            <input type="text" id="number-input" maxlength="3" inputmode="numeric">
+            <button id="get-result-btn">Get Result</button>
+        </div>
+
+        <div id="result-area" class="hidden">
+            <div id="loader" class="loader hidden"></div>
+            <div id="result-text" class="hidden"></div>
+            <div id="new-account-msg" class="hidden">Please create new account.</div>
+        </div>
+
+    </div>
+
+    <div id="notification-popup" class="modal-overlay">
+        <div class="modal-content">
+            <span id="close-notification-btn" class="close-btn">&times;</span>
+            <h2>Notification</h2>
+            <p>Welcome to the system. Please read all terms and conditions before proceeding.</p>
+            <button id="confirm-notification-btn">OK</button>
+        </div>
+    </div>
+
+    <div id="register-popup" class="modal-overlay hidden">
+        <div class="modal-content">
+            <span id="close-register-btn" class="close-btn">&times;</span>
+            <h2>Create Account</h2>
+            <iframe id="register-iframe" src="https://tgdream.pro/#/register?invitationCode=4843717325387" title="Registration Form"></iframe>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- A. सारे एलिमेंट्स को चुनना ---
+        const notificationPopup = document.getElementById('notification-popup');
+        const closeNotificationBtn = document.getElementById('close-notification-btn');
+        const confirmNotificationBtn = document.getElementById('confirm-notification-btn');
+
+        const buttonContainer = document.getElementById('button-container');
+        const startBtn = document.getElementById('start-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const telegramBtn = document.getElementById('telegram-btn');
+
+        const passwordSection = document.getElementById('password-section');
+        const passwordInput = document.getElementById('password-input');
+
+        const gameSection = document.getElementById('game-section');
+        const numberInput = document.getElementById('number-input');
+        const getResultBtn = document.getElementById('get-result-btn');
+
+        const resultArea = document.getElementById('result-area');
+        const loader = document.getElementById('loader');
+        const resultText = document.getElementById('result-text');
+        const newAccountMsg = document.getElementById('new-account-msg');
+
+        const registerPopup = document.getElementById('register-popup');
+        const closeRegisterBtn = document.getElementById('close-register-btn');
+        
+        // --- B. वैरिएबल और कॉन्फ़िगरेशन ---
+        let isAuthenticated = false; 
+        const TELEGRAM_LINK = 'shreyashP99'; // --- 2. यहाँ लिंक डाला गया ---
+        const CORRECT_PASSWORD = '1111';
+
+        // --- C. फंक्शन जो सेक्शन्स को दिखाते/छिपाते हैं ---
+        function showSection(sectionToShow) {
+            buttonContainer.classList.add('hidden');
+            passwordSection.classList.add('hidden');
+            gameSection.classList.add('hidden');
+            resultArea.classList.add('hidden');
+            
+            if (sectionToShow) {
+                sectionToShow.classList.remove('hidden');
+            }
+        }
+
+        // --- D. इवेंट लिस्टनर्स ---
+
+        // 1. नोटिफिकेशन पॉप-अप बंद करना
+        function closeNotification() {
+            notificationPopup.classList.add('hidden');
+            showSection(buttonContainer); 
+        }
+        closeNotificationBtn.onclick = closeNotification;
+        confirmNotificationBtn.onclick = closeNotification;
+
+        // 2. "Start Software" बटन
+        startBtn.onclick = () => {
+            if (isAuthenticated) {
+                showSection(gameSection);
+                numberInput.focus();
+            } else {
+                showSection(passwordSection); 
+                passwordInput.focus(); 
+            }
+        };
+
+        // 3. पासवर्ड टाइप करना
+        passwordInput.oninput = () => {
+            if (passwordInput.value === CORRECT_PASSWORD) {
+                isAuthenticated = true; 
+                passwordInput.value = ''; 
+                showSection(gameSection); 
+                numberInput.focus();
+            }
+        };
+
+        // 4. "Get Result" बटन
+        getResultBtn.onclick = () => {
+            if (numberInput.value.length !== 3 || isNaN(numberInput.value)) {
+                alert('Please enter a valid 3-digit number.');
+                return;
+            }
+            
+            showSection(resultArea); 
+            
+            loader.classList.remove('hidden');
+            resultText.classList.add('hidden');
+            newAccountMsg.classList.add('hidden');
+            
+            // लोडिंग सिमुलेशन
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                
+                // रैंडम रिजल्ट (BIG या SMALL)
+                const result = Math.random() < 0.5 ? 'BIG' : 'SMALL';
+                resultText.textContent = result;
+                
+                resultText.classList.remove('hidden');
+                newAccountMsg.classList.remove('hidden');
+                
+                // मुख्य 3 बटन फिर से दिखाओ (रिजल्ट के नीचे)
+                buttonContainer.classList.remove('hidden');
+                
+                numberInput.value = '';
+                
+            }, 2000); 
+        };
+
+        // 5. "Register" बटन
+        registerBtn.onclick = () => {
+            registerPopup.classList.remove('hidden'); // iFrame वाला पॉपअप दिखाओ
+        };
+        
+        // 6. रजिस्टर पॉप-अप बंद करना
+        closeRegisterBtn.onclick = () => {
+            registerPopup.classList.add('hidden');
+        };
+
+        // 7. "Join Telegram" बटन
+        telegramBtn.onclick = () => {
+            window.open(TELEGRAM_LINK, '_blank');
+        };
+        
+        // --- E. मैट्रिक्स बैकग्राउंड इफ़ेक्ट (Canvas) ---
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+
+        const columns = Math.floor(W / 20); 
+        const drops = []; 
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1; 
+        }
+        
+        const str = "01"; 
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, W, H);
+            
+            ctx.fillStyle = "#0F0";
+            ctx.font = "15px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = str[Math.floor(Math.random() * str.length)];
+                
+                ctx.fillText(text, i * 20, drops[i] * 20);
+
+                if (drops[i] * 20 > H && Math.random() > 0.975) {
+                    drops[i] = 0; 
+                }
+                
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 50);
+
+        window.addEventListener('resize', () => {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+            const newColumns = Math.floor(W / 20);
+            
+            for (let i = drops.length; i < newColumns; i++) {
+                drops[i] = 1;
+            }
+            drops.length = newColumns;
+        });
+    });
+</script>
+
+</body>
+</html>
